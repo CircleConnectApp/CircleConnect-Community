@@ -10,6 +10,8 @@ services:
       POSTGRES_DB: circleConnect
     volumes:
       - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U postgres"]
       interval: 5s
@@ -17,15 +19,23 @@ services:
       retries: 5
 
   # Community Service
-  community-service:
-    build: ./CircleConnect-Community
+  community:
+    build: .
     ports:
-      - "3000:3000"  # Host:Container port
+      - "3000:3000"
     env_file:
-      - ./CircleConnect-Community/.env
+      - .env
     depends_on:
       postgres:
         condition: service_healthy
+      volumes:
+        - .:/app
+      environment:
+        - NODE_ENV=development    
 
 volumes:
   postgres_data:
+redis:
+  image: redis:alpine
+  ports:
+    - "6379:6379"
